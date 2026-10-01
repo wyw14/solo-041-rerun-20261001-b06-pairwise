@@ -52,9 +52,12 @@ type Plant struct {
 	receiver      *sensor.Receiver
 }
 
-func NewPlant(dataDir string, lines []model.LineID, now func() time.Time) (*Plant, error) {
+func NewPlant(dataDir string, lines []model.LineID, windowSize int, now func() time.Time) (*Plant, error) {
 	if dataDir == "" || len(lines) == 0 || now == nil {
 		return nil, errors.New("plant data directory, lines and clock are required")
+	}
+	if windowSize < 3 {
+		return nil, errors.New("aeration observation window must contain at least three readings")
 	}
 	store, err := journal.NewFileStore(filepath.Join(dataDir, "journal"))
 	if err != nil {
@@ -96,7 +99,7 @@ func NewPlant(dataDir string, lines []model.LineID, now func() time.Time) (*Plan
 	if err != nil {
 		return nil, err
 	}
-	windows, err := aeration.NewWindowBook(10)
+	windows, err := aeration.NewWindowBook(windowSize)
 	if err != nil {
 		return nil, err
 	}
