@@ -52,9 +52,12 @@ type Plant struct {
 	receiver      *sensor.Receiver
 }
 
-func NewPlant(dataDir string, lines []model.LineID, now func() time.Time) (*Plant, error) {
+func NewPlant(dataDir string, lines []model.LineID, sampleWindow int, now func() time.Time) (*Plant, error) {
 	if dataDir == "" || len(lines) == 0 || now == nil {
 		return nil, errors.New("plant data directory, lines and clock are required")
+	}
+	if sampleWindow < 3 || sampleWindow > 120 {
+		return nil, errors.New("sample window must be between 3 and 120")
 	}
 	store, err := journal.NewFileStore(filepath.Join(dataDir, "journal"))
 	if err != nil {
@@ -92,11 +95,11 @@ func NewPlant(dataDir string, lines []model.LineID, now func() time.Time) (*Plan
 			return nil, err
 		}
 	}
-	decoder, err := sensor.NewBatchDecoder(24)
+	decoder, err := sensor.NewBatchDecoder(sampleWindow)
 	if err != nil {
 		return nil, err
 	}
-	windows, err := aeration.NewWindowBook(10)
+	windows, err := aeration.NewWindowBook(sampleWindow)
 	if err != nil {
 		return nil, err
 	}

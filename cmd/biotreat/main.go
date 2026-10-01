@@ -32,7 +32,7 @@ func run() error {
 	}
 	clock := func() time.Time { return time.Now().UTC() }
 	lineIDs := []model.LineID{"line-1", "line-2", "line-3"}
-	plant, err := process.NewPlant(cfg.DataDir, lineIDs, clock)
+	plant, err := process.NewPlant(cfg.DataDir, lineIDs, cfg.SampleWindow, clock)
 	if err != nil {
 		return err
 	}
